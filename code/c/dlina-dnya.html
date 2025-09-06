@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Ответ</title>
+    <style>
+        /* Основное оформление страницы */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 20px;
+        }
+        .content {
+            max-width: 100%; /* Вместо 800px */
+            margin: 0 auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        pre {
+            background-color: #f4f4f4;
+            padding: 10px;
+            overflow-x: auto;
+        }
+        code {
+            background-color: #f4f4f4;
+            padding: 2px 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="content">
+    <p>
+Напиши код на Си который можно откомпилировать и в Linux и в Windows, который выводит текущую дату и время и просит ввести широту места в градусах от плюс 90 до минус 90, и рассчитывает и выводит длину дня для этой широты для текущей даты в часах и минутах.
+    </p>
+    
+    
+        <div class="codehilite"><pre><span></span><code><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;stdio.h&gt;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;stdlib.h&gt;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;time.h&gt;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;math.h&gt;</span>
+
+<span class="c1">// Для Windows, чтобы использовать _MSC_VER, нужно определить _CRT_SECURE_NO_WARNINGS</span>
+<span class="c1">// Или использовать _WIN32 для функций, специфичных для Windows, но здесь мы обойдемся без них.</span>
+
+<span class="c1">// Для корректной работы с плавающей точкой и функциями из math.h</span>
+<span class="cp">#ifndef M_PI</span>
+<span class="cp">#define M_PI 3.14159265358979323846</span>
+<span class="cp">#endif</span>
+
+<span class="c1">// Функция для расчета длины дня</span>
+<span class="c1">// Принимает широту (lat) в радианах и номер дня в году (dayOfYear)</span>
+<span class="c1">// Возвращает длину дня в часах</span>
+<span class="kt">double</span><span class="w"> </span><span class="nf">calculateDayLength</span><span class="p">(</span><span class="kt">double</span><span class="w"> </span><span class="n">lat</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">dayOfYear</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// Расчет склонения Солнца (приблизительная модель)</span>
+<span class="w">    </span><span class="c1">// Угол склонения (declination) Солнца варьируется в течение года.</span>
+<span class="w">    </span><span class="c1">// Упрощенная модель: decl = 23.45 * sin(2 * PI * (dayOfYear - 81) / 365.25)</span>
+<span class="w">    </span><span class="kt">double</span><span class="w"> </span><span class="n">declination</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">23.45</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">sin</span><span class="p">(</span><span class="mf">2.0</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">M_PI</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="p">(</span><span class="n">dayOfYear</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="mi">81</span><span class="p">)</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mf">365.25</span><span class="p">);</span>
+
+<span class="w">    </span><span class="c1">// Угол часового угла (hour angle) для восхода/захода</span>
+<span class="w">    </span><span class="c1">// cos(H) = (sin(lat) * sin(decl) - sin(0.83)) / (cos(lat) * cos(decl))</span>
+<span class="w">    </span><span class="c1">// 0.83 градуса - это примерно 4 минуты, учитываем атмосферную рефракцию и размер диска Солнца</span>
+<span class="w">    </span><span class="kt">double</span><span class="w"> </span><span class="n">cosHourAngle</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">sin</span><span class="p">(</span><span class="n">lat</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">sin</span><span class="p">(</span><span class="n">declination</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">M_PI</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mf">180.0</span><span class="p">)</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">sin</span><span class="p">(</span><span class="mf">0.83</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">M_PI</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mf">180.0</span><span class="p">))</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="p">(</span><span class="n">cos</span><span class="p">(</span><span class="n">lat</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">cos</span><span class="p">(</span><span class="n">declination</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">M_PI</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mf">180.0</span><span class="p">));</span>
+
+<span class="w">    </span><span class="c1">// Обработка полярных дней и ночей</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">cosHourAngle</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mf">1.0</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="mf">0.0</span><span class="p">;</span><span class="w"> </span><span class="c1">// Полярная ночь</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">cosHourAngle</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mf">-1.0</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="mf">24.0</span><span class="p">;</span><span class="w"> </span><span class="c1">// Полярный день</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="c1">// Расчет часового угла в радианах</span>
+<span class="w">    </span><span class="kt">double</span><span class="w"> </span><span class="n">hourAngle</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">acos</span><span class="p">(</span><span class="n">cosHourAngle</span><span class="p">);</span>
+
+<span class="w">    </span><span class="c1">// Длина дня в часах</span>
+<span class="w">    </span><span class="kt">double</span><span class="w"> </span><span class="n">dayLengthHours</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">hourAngle</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mf">180.0</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">M_PI</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mf">2.0</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mf">15.0</span><span class="p">;</span><span class="w"> </span><span class="c1">// (угол в градусах / 15 градусов в час)</span>
+
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">dayLengthHours</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="kt">int</span><span class="w"> </span><span class="nf">main</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// 1. Получение текущей даты и времени</span>
+<span class="w">    </span><span class="kt">time_t</span><span class="w"> </span><span class="n">currentTime</span><span class="p">;</span>
+<span class="w">    </span><span class="k">struct</span><span class="w"> </span><span class="nc">tm</span><span class="w"> </span><span class="o">*</span><span class="n">localTime</span><span class="p">;</span>
+
+<span class="w">    </span><span class="c1">// Получаем текущее время</span>
+<span class="w">    </span><span class="n">time</span><span class="p">(</span><span class="o">&amp;</span><span class="n">currentTime</span><span class="p">);</span>
+<span class="w">    </span><span class="c1">// Преобразуем его в локальное время</span>
+<span class="w">    </span><span class="n">localTime</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">localtime</span><span class="p">(</span><span class="o">&amp;</span><span class="n">currentTime</span><span class="p">);</span>
+
+<span class="w">    </span><span class="c1">// Выводим текущую дату и время</span>
+<span class="w">    </span><span class="n">printf</span><span class="p">(</span><span class="s">&quot;Текущая дата и время: %02d.%02d.%d %02d:%02d:%02d</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span>
+<span class="w">           </span><span class="n">localTime</span><span class="o">-&gt;</span><span class="n">tm_mday</span><span class="p">,</span><span class="w"> </span><span class="n">localTime</span><span class="o">-&gt;</span><span class="n">tm_mon</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="n">localTime</span><span class="o">-&gt;</span><span class="n">tm_year</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1900</span><span class="p">,</span>
+<span class="w">           </span><span class="n">localTime</span><span class="o">-&gt;</span><span class="n">tm_hour</span><span class="p">,</span><span class="w"> </span><span class="n">localTime</span><span class="o">-&gt;</span><span class="n">tm_min</span><span class="p">,</span><span class="w"> </span><span class="n">localTime</span><span class="o">-&gt;</span><span class="n">tm_sec</span><span class="p">);</span>
+
+<span class="w">    </span><span class="c1">// 2. Получение широты от пользователя</span>
+<span class="w">    </span><span class="kt">double</span><span class="w"> </span><span class="n">latitudeDegrees</span><span class="p">;</span>
+<span class="w">    </span><span class="kt">char</span><span class="w"> </span><span class="n">inputBuffer</span><span class="p">[</span><span class="mi">100</span><span class="p">];</span><span class="w"> </span><span class="c1">// Буфер для чтения ввода</span>
+
+<span class="w">    </span><span class="k">while</span><span class="w"> </span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">printf</span><span class="p">(</span><span class="s">&quot;</span><span class="se">\n</span><span class="s">Введите широту места в градусах (от +90 до -90): &quot;</span><span class="p">);</span>
+<span class="w">        </span><span class="c1">// Используем fgets для более безопасного чтения ввода</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">fgets</span><span class="p">(</span><span class="n">inputBuffer</span><span class="p">,</span><span class="w"> </span><span class="k">sizeof</span><span class="p">(</span><span class="n">inputBuffer</span><span class="p">),</span><span class="w"> </span><span class="n">stdin</span><span class="p">)</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="nb">NULL</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="c1">// Обработка ошибки ввода</span>
+<span class="w">            </span><span class="n">printf</span><span class="p">(</span><span class="s">&quot;Ошибка чтения ввода. Попробуйте снова.</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">);</span>
+<span class="w">            </span><span class="k">continue</span><span class="p">;</span>
+<span class="w">        </span><span class="p">}</span>
+
+<span class="w">        </span><span class="c1">// Преобразуем введенную строку в число с плавающей точкой</span>
+<span class="w">        </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">endPtr</span><span class="p">;</span>
+<span class="w">        </span><span class="n">latitudeDegrees</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">strtod</span><span class="p">(</span><span class="n">inputBuffer</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">endPtr</span><span class="p">);</span>
+
+<span class="w">        </span><span class="c1">// Проверяем, было ли преобразование успешным и был ли ввод корректным</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">endPtr</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">inputBuffer</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="o">*</span><span class="n">endPtr</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="sc">&#39;\n&#39;</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="c1">// Если преобразование не удалось или остались лишние символы</span>
+<span class="w">            </span><span class="n">printf</span><span class="p">(</span><span class="s">&quot;Некорректный ввод. Пожалуйста, введите число (например, 55.75).</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">);</span>
+<span class="w">        </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">latitudeDegrees</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mf">-90.0</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="n">latitudeDegrees</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mf">90.0</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="n">printf</span><span class="p">(</span><span class="s">&quot;Широта должна быть в диапазоне от -90 до +90 градусов.</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">);</span>
+<span class="w">        </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="k">break</span><span class="p">;</span><span class="w"> </span><span class="c1">// Корректный ввод, выходим из цикла</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="c1">// 3. Расчет длины дня</span>
+<span class="w">    </span><span class="c1">// Переводим широту из градусов в радианы</span>
+<span class="w">    </span><span class="kt">double</span><span class="w"> </span><span class="n">latitudeRadians</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">latitudeDegrees</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">M_PI</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mf">180.0</span><span class="p">;</span>
+
+<span class="w">    </span><span class="c1">// Получаем номер дня в году (localTime-&gt;tm_yday)</span>
+<span class="w">    </span><span class="c1">// tm_yday: номер дня с начала года, от 0 до 365 (или 366 для високосного года)</span>
+<span class="w">    </span><span class="c1">// Нам нужен номер дня от 1 до 365/366 для нашей модели склонения.</span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">dayOfYear</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">localTime</span><span class="o">-&gt;</span><span class="n">tm_yday</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span>
+
+<span class="w">    </span><span class="kt">double</span><span class="w"> </span><span class="n">dayLengthHours</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">calculateDayLength</span><span class="p">(</span><span class="n">latitudeRadians</span><span class="p">,</span><span class="w"> </span><span class="n">dayOfYear</span><span class="p">);</span>
+
+<span class="w">    </span><span class="c1">// 4. Вывод результата</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">dayLengthHours</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mf">0.0</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">printf</span><span class="p">(</span><span class="s">&quot;Для широты %.2f на %02d.%02d.%d наступила полярная ночь.</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span>
+<span class="w">               </span><span class="n">latitudeDegrees</span><span class="p">,</span><span class="w"> </span><span class="n">localTime</span><span class="o">-&gt;</span><span class="n">tm_mday</span><span class="p">,</span><span class="w"> </span><span class="n">localTime</span><span class="o">-&gt;</span><span class="n">tm_mon</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="n">localTime</span><span class="o">-&gt;</span><span class="n">tm_year</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1900</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">dayLengthHours</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mf">24.0</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">printf</span><span class="p">(</span><span class="s">&quot;Для широты %.2f на %02d.%02d.%d наступил полярный день.</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span>
+<span class="w">               </span><span class="n">latitudeDegrees</span><span class="p">,</span><span class="w"> </span><span class="n">localTime</span><span class="o">-&gt;</span><span class="n">tm_mday</span><span class="p">,</span><span class="w"> </span><span class="n">localTime</span><span class="o">-&gt;</span><span class="n">tm_mon</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="n">localTime</span><span class="o">-&gt;</span><span class="n">tm_year</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1900</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="kt">int</span><span class="w"> </span><span class="n">hours</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="p">)</span><span class="n">dayLengthHours</span><span class="p">;</span>
+<span class="w">        </span><span class="kt">int</span><span class="w"> </span><span class="n">minutes</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="kt">int</span><span class="p">)((</span><span class="n">dayLengthHours</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">hours</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mf">60.0</span><span class="p">);</span>
+<span class="w">        </span><span class="n">printf</span><span class="p">(</span><span class="s">&quot;Приблизительная длина дня для широты %.2f на %02d.%02d.%d: %d часов %02d минут.</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span>
+<span class="w">               </span><span class="n">latitudeDegrees</span><span class="p">,</span><span class="w"> </span><span class="n">localTime</span><span class="o">-&gt;</span><span class="n">tm_mday</span><span class="p">,</span><span class="w"> </span><span class="n">localTime</span><span class="o">-&gt;</span><span class="n">tm_mon</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="n">localTime</span><span class="o">-&gt;</span><span class="n">tm_year</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1900</span><span class="p">,</span><span class="w"> </span><span class="n">hours</span><span class="p">,</span><span class="w"> </span><span class="n">minutes</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p><strong>Как скомпилировать и запустить:</strong></p>
+<p><strong>На Linux:</strong></p>
+<ol>
+<li>Сохраните код в файл с названием, например, <code>daylength.c</code>.</li>
+<li>Откройте терминал.</li>
+<li>Используйте GCC (GNU Compiler Collection):
+    <code>bash
+    gcc daylength.c -o daylength -lm -Wall -Wextra</code><ul>
+<li><code>gcc</code>: имя компилятора.</li>
+<li><code>daylength.c</code>: ваш исходный файл.</li>
+<li><code>-o daylength</code>: указывает имя выходного исполняемого файла.</li>
+<li><code>-lm</code>: <strong>Важно!</strong> Эта опция связывает программу с математической библиотекой, которая содержит функции вроде <code>sin</code>, <code>cos</code>, <code>acos</code>. Без нее вы получите ошибки линковки.</li>
+<li><code>-Wall</code>, <code>-Wextra</code>: включают дополнительные предупреждения компилятора, что очень полезно для написания более качественного кода.</li>
+</ul>
+</li>
+<li>Запустите программу:
+    <code>bash
+    ./daylength</code></li>
+</ol>
+<p><strong>На Windows:</strong></p>
+<p>Вам понадобится компилятор Си, например, MinGW-w64 (который включает GCC) или использовать Visual Studio с установленным SDK.</p>
+<p><strong>С использованием MinGW-w64 (рекомендуется для совместимости с GCC):</strong></p>
+<ol>
+<li>Установите MinGW-w64, если у вас его нет.</li>
+<li>Сохраните код в файл <code>daylength.c</code>.</li>
+<li>Откройте командную строку (cmd.exe) или PowerShell, перейдите в каталог, где сохранен файл.</li>
+<li>Используйте GCC из MinGW-w64:
+    <code>bash
+    gcc daylength.c -o daylength.exe -lm -Wall -Wextra</code><ul>
+<li>Флаг <code>-lm</code> здесь также важен, так как <code>math.h</code> функции предоставляются отдельной библиотекой.</li>
+</ul>
+</li>
+<li>Запустите программу:
+    <code>bash
+    ./daylength.exe</code></li>
+</ol>
+<p><strong>С использованием Visual Studio (MSVC):</strong></p>
+<ol>
+<li>Создайте новый проект "Консольное приложение" (Console App).</li>
+<li>Вставьте код в файл <code>.c</code> (или <code>.cpp</code>, но с расширением <code>.c</code> для Си).</li>
+<li><strong>Для MSVC:</strong><ul>
+<li>Вам может понадобиться добавить <code>#define _CRT_SECURE_NO_WARNINGS</code> в начало файла, чтобы избежать предупреждений о безопасности функций типа <code>printf</code>, <code>fgets</code> и <code>strtod</code>.</li>
+<li>Математические функции обычно автоматически подключаются.</li>
+<li>Компиляция происходит через меню "Сборка" -&gt; "Собрать решение" (Build -&gt; Build Solution).</li>
+</ul>
+</li>
+<li>Запустите исполняемый файл из каталога <code>Debug</code> или <code>Release</code> вашего проекта.</li>
+</ol>
+<p><strong>Пояснения к коду:</strong></p>
+<ol>
+<li>
+<p><strong>Заголовочные файлы:</strong></p>
+<ul>
+<li><code>stdio.h</code>: для стандартных функций ввода/вывода (<code>printf</code>, <code>fgets</code>, <code>stdin</code>).</li>
+<li><code>stdlib.h</code>: для <code>strtod</code> (преобразование строки в double), <code>system</code> (хотя здесь не используется, но часто нужен), <code>exit</code>.</li>
+<li><code>time.h</code>: для работы с датой и временем (<code>time_t</code>, <code>struct tm</code>, <code>time</code>, <code>localtime</code>).</li>
+<li><code>math.h</code>: для математических функций (<code>sin</code>, <code>cos</code>, <code>acos</code>, <code>M_PI</code>).</li>
+<li><code>M_PI</code>: макрос для числа Пи. В некоторых компиляторах (особенно старых или в Windows без определенных флагов) он может быть не определен в <code>math.h</code>, поэтому мы его определяем вручную, если он отсутствует.</li>
+</ul>
+</li>
+<li>
+<p><strong><code>calculateDayLength</code> функция:</strong></p>
+<ul>
+<li>Принимает широту в <strong>радианах</strong> и номер дня в году (от 1 до 365/366).</li>
+<li><strong>Склонение Солнца (declination):</strong> Это угол между плоскостью экватора Земли и направлением на Солнце. Он меняется в течение года. Формула <code>23.45 * sin(2 * PI * (dayOfYear - 81) / 365.25)</code> — это упрощенная модель, дающая приблизительное значение. 81 — это примерно день весеннего равноденствия.</li>
+<li><strong>Часовой угол (hour angle):</strong> Это угол, на который Земля повернулась с полудня до момента восхода/захода. Его косинус рассчитывается по формуле, учитывающей широту, склонение и небольшую поправку на атмосферную рефракцию и размер диска Солнца (0.83 градуса).</li>
+<li><strong>Полярный день/ночь:</strong> Если <code>cosHourAngle</code> больше 1, это означает, что Солнце никогда не поднимается выше горизонта (полярная ночь). Если меньше -1, значит, оно никогда не опускается ниже горизонта (полярный день).</li>
+<li><strong>Длина дня:</strong> Рассчитывается на основе часового угла. <code>hourAngle</code> в радианах, умножаем на <code>180.0 / M_PI</code> для перевода в градусы, делим на 15 (потому что Земля вращается на 15 градусов в час), и умножаем на 2, чтобы получить общую продолжительность светового дня.</li>
+</ul>
+</li>
+<li>
+<p><strong><code>main</code> функция:</strong></p>
+<ul>
+<li><strong>Получение времени:</strong> <code>time()</code> получает текущее время в виде секунд с начала эпохи Unix. <code>localtime()</code> преобразует это в структуру <code>tm</code>, содержащую компоненты даты и времени (год, месяц, день, час, минуты, секунды, день недели, день года и т.д.).</li>
+<li><strong>Ввод широты:</strong> Используется <code>fgets</code> для безопасного чтения строки. Затем <code>strtod</code> преобразует эту строку в <code>double</code>. Проверяется, корректен ли ввод (что это число и оно в допустимом диапазоне).</li>
+<li><strong>Расчет:</strong> Широта конвертируется в радианы, а номер дня в году (полученный из <code>localTime-&gt;tm_yday</code>) корректируется на +1, так как <code>tm_yday</code> нумеруется с 0.</li>
+<li><strong>Вывод:</strong> Результат выводится в удобочитаемом формате, обрабатывая случаи полярного дня и ночи.</li>
+</ul>
+</li>
+</ol>
+<p>Этот код должен корректно работать как в Linux, так и в Windows при использовании стандартных компиляторов C.</p>
+    </div>
+  <p dir="rtl" lang="ar" style="text-align:center;"><a href="https://salaminfo.github.io/">سَلَام</a></p>
+</body>
+</html>
