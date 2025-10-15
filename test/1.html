@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <title>Пример шапки с меню</title>
+  <style>
+    /* Сброс отступов и размеров */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      line-height: 1.5;
+    }
+
+    /* Шапка сайта */
+    .site-header {
+      background-color: #2c3e50;
+      color: #fff;
+    }
+
+    .site-header .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    /* Логотип / название сайта */
+    .logo {
+      font-size: 24px;
+      text-decoration: none;
+      color: #fff;
+    }
+
+    /* Главное меню */
+    .main-nav ul {
+      list-style: none;
+      display: flex;
+    }
+
+    .main-nav li {
+      margin-left: 20px;
+    }
+
+    .main-nav li:first-child {
+      margin-left: 0;
+    }
+
+    .main-nav a {
+      text-decoration: none;
+      color: #ecf0f1;
+      padding: 8px 12px;
+      border-radius: 4px;
+      transition: background-color 0.3s;
+    }
+
+    .main-nav a:hover {
+      background-color: rgba(236, 240, 241, 0.2);
+    }
+
+    /* Адаптив: на узких экранах меню будет по центру под логотипом */
+    @media (max-width: 600px) {
+      .site-header .container {
+        flex-direction: column;
+        text-align: center;
+      }
+      .main-nav ul {
+        flex-direction: column;
+      }
+      .main-nav li {
+        margin: 10px 0;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="container">
+      <a href="#" class="logo">Мой Сайт</a>
+      <nav class="main-nav">
+        <ul>
+          <li><a href="#nature-tech">Природа и техника</a></li>
+          <li><a href="#history-religion">История и религия</a></li>
+          <li><a href="#arabic">Арабский язык</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Дальнейший контент страницы -->
+  <main class="container">
+    <h2 id="nature-tech">Раздел «Природа и техника»</h2>
+    <p>...</p>
+
+    <h2 id="history-religion">Раздел «История и религия»</h2>
+    <p>...</p>
+
+    <h2 id="arabic">Раздел «Арабский язык»</h2>
+    <p>...</p>
+  </main>
+
+</body>
+</html>
